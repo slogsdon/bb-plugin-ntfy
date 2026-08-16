@@ -87,6 +87,31 @@ function interactionLabel(kind) {
       return "Provider interaction pending";
   }
 }
+async function resolveDeeplinkBaseUrl(loopbackBaseUrl) {
+  try {
+    const response = await fetch(
+      `${loopbackBaseUrl}/api/v1/plugins/connect/rpc/status`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "null"
+      }
+    );
+    if (!response.ok) return loopbackBaseUrl;
+    const payload = await response.json();
+    if (typeof payload !== "object" || payload === null) return loopbackBaseUrl;
+    const rpcResponse = payload;
+    if (rpcResponse.ok !== true) return loopbackBaseUrl;
+    const result = rpcResponse.result;
+    if (typeof result !== "object" || result === null) return loopbackBaseUrl;
+    const { paired, url } = result;
+    if (paired === true && typeof url === "string" && url.length > 0) {
+      return url.replace(/\/+$/, "");
+    }
+  } catch {
+  }
+  return loopbackBaseUrl;
+}
 async function plugin(bb) {
   const settings = bb.settings.define({
     topic: {
@@ -184,9 +209,10 @@ async function plugin(bb) {
   async function send(thread, message, record) {
     const cfg = await settings.get();
     if (!cfg.topic) return;
-    const click = (() => {
+    const click = await (async () => {
       try {
-        return `${bb.server.loopbackBaseUrl}/projects/${encodeURIComponent(
+        const baseUrl = await resolveDeeplinkBaseUrl(bb.server.loopbackBaseUrl);
+        return `${baseUrl}/projects/${encodeURIComponent(
           thread.projectId
         )}/threads/${encodeURIComponent(thread.id)}`;
       } catch {

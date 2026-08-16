@@ -58,6 +58,37 @@ function interactionLabel(kind: string): string {
   }
 }
 
+/** Prefer bb connect's remote origin when this server is paired. */
+async function resolveDeeplinkBaseUrl(
+  loopbackBaseUrl: string,
+): Promise<string> {
+  try {
+    const response = await fetch(
+      `${loopbackBaseUrl}/api/v1/plugins/connect/rpc/status`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "null",
+      },
+    );
+    if (!response.ok) return loopbackBaseUrl;
+
+    const payload: unknown = await response.json();
+    if (typeof payload !== "object" || payload === null) return loopbackBaseUrl;
+    const rpcResponse = payload as { ok?: unknown; result?: unknown };
+    if (rpcResponse.ok !== true) return loopbackBaseUrl;
+    const result = rpcResponse.result;
+    if (typeof result !== "object" || result === null) return loopbackBaseUrl;
+    const { paired, url } = result as { paired?: unknown; url?: unknown };
+    if (paired === true && typeof url === "string" && url.length > 0) {
+      return url.replace(/\/+$/, "");
+    }
+  } catch {
+    // bb connect may be disabled or unavailable; preserve local deeplinks.
+  }
+  return loopbackBaseUrl;
+}
+
 export default async function plugin(bb: BbPluginApi) {
   const settings = bb.settings.define({
     topic: {
@@ -181,9 +212,10 @@ export default async function plugin(bb: BbPluginApi) {
     const cfg = await settings.get();
     if (!cfg.topic) return;
 
-    const click = (() => {
+    const click = await (async () => {
       try {
-        return `${bb.server.loopbackBaseUrl}/projects/${encodeURIComponent(
+        const baseUrl = await resolveDeeplinkBaseUrl(bb.server.loopbackBaseUrl);
+        return `${baseUrl}/projects/${encodeURIComponent(
           thread.projectId,
         )}/threads/${encodeURIComponent(thread.id)}`;
       } catch {

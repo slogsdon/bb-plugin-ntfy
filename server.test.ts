@@ -34,10 +34,26 @@ function makeHost(options: {
 }
 
 function stubFetch(host: FakePluginHost): ReturnType<typeof vi.fn> {
-  const fetchMock = vi.fn(async () => {
-    return new Response(JSON.stringify({ id: "msg-1" }), { status: 200 });
-  });
-  vi.stubGlobal("fetch", fetchMock);
+  const fetchMock = vi.fn(
+    async (_input: string | URL | Request, _init?: RequestInit) => {
+      return new Response(JSON.stringify({ id: "msg-1" }), { status: 200 });
+    },
+  );
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).endsWith("/api/v1/plugins/connect/rpc/status")) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            result: { paired: false, url: null },
+          }),
+          { status: 200 },
+        );
+      }
+      return fetchMock(input, init);
+    }),
+  );
   return fetchMock;
 }
 
@@ -219,6 +235,9 @@ describe("thread.failed", () => {
     const headers = init.headers as Record<string, string>;
     expect(headers.Priority).toBe("4");
     expect(headers.Tags).toBe("rotating_light");
+    expect(headers.Click).toBe(
+      "http://127.0.0.1:38886/projects/project-1/threads/th_1",
+    );
     expect(String(init.body)).toContain("rate limit exceeded");
     await host.harness.lifecycle.dispose();
   });
@@ -246,6 +265,58 @@ describe("thread.failed", () => {
       error: "boom",
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    await host.harness.lifecycle.dispose();
+  });
+});
+
+describe("notification deeplinks", () => {
+  it("uses the bb connect URL when remote control is paired", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    const host = makeHost();
+    await plugin(host.bb);
+    const fetchMock = vi.fn(async (
+      input: string | URL | Request,
+      _init?: RequestInit,
+    ) => {
+      if (String(input).endsWith("/api/v1/plugins/connect/rpc/status")) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            result: {
+              paired: true,
+              url: "https://shane.getbb.app",
+            },
+          }),
+          { status: 200 },
+        );
+      }
+      return new Response(JSON.stringify({ id: "msg-1" }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const thread = makeThreadResponse({
+      id: "th_1",
+      projectId: "proj_1",
+      status: "error",
+      latestAttentionAt: NOW,
+      lastReadAt: NOW - 60_000,
+    });
+
+    await host.harness.behavior.emitThreadEvent("thread.failed", {
+      thread,
+      error: "boom",
+    });
+
+    const ntfyRequest = fetchMock.mock.calls.find(([input]) =>
+      String(input).startsWith("https://ntfy.example/"),
+    );
+    expect(ntfyRequest).toBeDefined();
+    const init = ntfyRequest?.[1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Click).toBe(
+      "https://shane.getbb.app/projects/proj_1/threads/th_1",
+    );
     await host.harness.lifecycle.dispose();
   });
 });
