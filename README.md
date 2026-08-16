@@ -3,6 +3,12 @@
 Push notifications to your phone via [ntfy.sh](https://ntfy.sh) whenever a bb
 thread needs your attention.
 
+## Screenshots
+
+![ntfy](docs/screenshot.png)
+
+*ntfy settings: topic, server, and access token fields.*
+
 ## What triggers a notification
 
 | Event | When | Priority |
