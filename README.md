@@ -79,8 +79,9 @@ thread DTO's `latestAttentionAt` vs `lastReadAt` timestamps — so "needs
 attention" means exactly what the sidebar red dot means. Pending interactions
 are checked through `bb.sdk.threads.interactions.list` on idle.
 
-Tapping a notification opens the thread in bb (via the local server's loopback
-URL; on a phone that resolves only when bb is reachable on that network).
+Tapping a notification opens the thread in bb. When bb connect is paired, the
+deeplink uses its remote URL; otherwise it falls back to the local server's
+loopback URL.
 
 ## Development
 
