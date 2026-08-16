@@ -1,0 +1,54 @@
+{
+  "name": "bb-plugin-ntfy",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Push notifications via ntfy.sh whenever a bb thread needs your attention: finished unread turns, failures, and pending approvals.",
+  "keywords": [
+    "bb",
+    "bb-plugin",
+    "getbb",
+    "agent-ide",
+    "ntfy",
+    "notifications",
+    "push"
+  ],
+  "author": "Shane Logsdon",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slogsdon/bb-plugin-ntfy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/slogsdon/bb-plugin-ntfy/issues"
+  },
+  "homepage": "https://github.com/slogsdon/bb-plugin-ntfy#readme",
+  "license": "MIT",
+  "scripts": {
+    "types": "bb plugin types",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "build": "bb plugin build ."
+  },
+  "engines": {
+    "bb": ">=0.38",
+    "bbPluginSdk": ">=0.4.6"
+  },
+  "bb": {
+    "name": "ntfy notifications",
+    "description": "Push to your phone via ntfy.sh when a thread needs your attention.",
+    "branding": {
+      "icon": "Bell"
+    },
+    "server": "./server.ts"
+  },
+  "devDependencies": {
+    "@get-bb/plugin-sdk": "0.4.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "better-sqlite3": "^12.0.0",
+    "cron-parser": "^5.10.0",
+    "hono": "^4.11.9",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}
