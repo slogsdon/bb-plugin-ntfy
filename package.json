@@ -1,6 +1,6 @@
 {
   "name": "bb-plugin-ntfy",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Push notifications via ntfy.sh whenever a bb thread needs your attention: finished unread turns, failures, and pending approvals.",
   "keywords": [
@@ -53,6 +53,7 @@
     "zod": "^4.3.6"
   },
   "files": [
-    "dist"
+    "dist",
+    "server.ts"
   ]
 }
