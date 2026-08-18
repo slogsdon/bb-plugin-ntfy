@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Notification/bell glyph. BB renders this as a CSS mask, so only the
+       transparent shape matters; stroke inherits the surrounding text color. -->
+  <path d="M6 8C6 4.68629 8.68629 2 12 2C15.3137 2 18 4.68629 18 8V11.811C18 13.2478 18.5557 14.6145 19.5377 15.6049C20.0412 16.113 20.341 16.404 20.4177 17.0834C20.4215 17.1149 20.4205 17.1467 20.4148 17.1777C20.3225 17.6986 19.6593 17.923 18.4748 18.1674C16.1967 18.6321 13.1963 18.75 12 18.75C10.8037 18.75 7.8033 18.6321 5.5252 18.1674C4.3407 17.923 3.6775 17.6986 3.5852 17.1777C3.5795 17.1467 3.5785 17.1149 3.5823 17.0834C3.659 16.404 3.9588 16.113 4.4623 15.6049C5.4443 14.6145 6 13.2478 6 11.811V8Z" stroke="currentColor" stroke-width="1.5"/>
+  <path d="M10.5 21C11 21.3 11.6 21.5 12 21.5C12.4 21.5 13 21.3 13.5 21" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>
+</svg>
